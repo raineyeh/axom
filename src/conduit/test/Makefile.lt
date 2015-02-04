@@ -1,0 +1,59 @@
+#
+# Makefile.lt
+#
+BasBin = /home/taylor16/trunk/basis/dev/sgnu/bin
+
+LOCALBUILD = /home/taylor16/testzzz-ets-4.6.3-4.3f3
+
+ConduitInc = -I/home/taylor16/stash/conduit/src/conduit -I/home/taylor16/stash/build-conduit/conduit
+ConduitLib = -L/home/taylor16/stash/build-conduit/conduit -lconduit -Wl,-rpath,/home/taylor16/stash/build-conduit/conduit
+
+
+# Conduit source
+CONDUIT_SRC = ..
+
+# Datastore source
+DS_SRC = ../..
+VPATH = $(CONDUIT_SRC):$(DS_SRC)
+
+LIBOBJS = \
+	DataObject.o \
+	DataGroup.o \
+	DatastoreInterface.o \
+	DataFunctionCompiled.o \
+	c-datastore.o
+
+#CONDUITOBJS = \
+#	DataObjectConduit.o
+
+CLIBS =  -L. -lds -lstdc++
+CXXLIBS = -L. -lds $(ConduitLib)
+
+CFLAGS = -fPIC -O0 -g3 -std=c99 -I$(DS_SRC)
+CXXFLAGS = -fPIC -O0 -g3 -std=c++11 -Wall -Wextra -Wshadow -pedantic -Woverloaded-virtual -Wno-unused-variable -Wno-unused-parameter -Wno-return-type -I. -I.. -I$(DS_SRC) $(ConduitInc) -fpermissive
+# -Wabi
+
+all : test1.x
+
+$(LIBOBJS) : Attributes.hpp DataGroup.hpp Types.hpp DataFunctionCompiled.hpp DataObject.hpp Utilities.hpp DataFunction.hpp DatastoreInterface.hpp
+
+libds.a : $(LIBOBJS)
+	ar -rsc $@ $?
+
+test1.x : libds.a $(CONDUITOBJS)
+
+#DataGroup.o : $(DS_SRC)/DataGroup.cpp
+%.o : %.cpp
+	$(CXX) $(CXXFLAGS) $< -c -o $@
+
+%.x : %.c
+	$(CC) $(CFLAGS) -I$(DS_SRC) $^ $(CLIBS) -o $@
+
+%.x : %.cpp
+	$(CXX) $(CXXFLAGS) -I$(DS_SRC) $^ $(CXXLIBS) -o $@
+
+clean : 
+	rm -f *~ test*.x libds.a $(LIBOBJS)
+
+.PHONY : clean
+

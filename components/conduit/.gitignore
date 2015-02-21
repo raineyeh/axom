@@ -1,0 +1,12 @@
+libs/
+build-debug/
+build-release/
+build-debug-xcode/
+build-release-xcode/
+install-debug/
+install-release/
+.DS_Store
+temp.cpp
+temp.exe
+*.pyc
+.ipynb_checkpoints

@@ -44,12 +44,12 @@
 
 //-----------------------------------------------------------------------------
 ///
-/// file: Core.cpp
+/// file: conduit_mpi.cpp
 ///
 //-----------------------------------------------------------------------------
 
-#include "Core.h"
-#include "Node.h"
+#include "conduit_mpi.h"
+#include <iostream>
 
 //-----------------------------------------------------------------------------
 // -- begin conduit:: --
@@ -57,13 +57,98 @@
 namespace conduit
 {
 
+    //-----------------------------------------------------------------------------
+// -- begin conduit::mpi --
+//-----------------------------------------------------------------------------
+namespace mpi
+{
 
+//---------------------------------------------------------------------------//
+int send(Node& node, int dest, int tag, MPI_Comm comm)
+{ 
+
+    Schema schema_c;
+    node.schema().compact_to(schema_c);
+    std::string schema = schema_c.to_json();
+    int schema_len = schema.length() + 1;
+
+    std::vector<uint8> data;
+    node.serialize(data);
+    int data_len = data.size();
+
+
+    int intArray[2] = { schema_len, data_len };
+
+
+    int mpiError = MPI_Send(intArray, 2, MPI_INT, dest, tag, comm);
+
+
+    //Check errors on return value mpiError here
+    if (mpiError == MPI_ERR_COMM) {
+    } else if (mpiError == MPI_ERR_COUNT) {
+    } else if (mpiError == MPI_ERR_TYPE) {
+    } else if (mpiError == MPI_ERR_TAG) {
+    } else if (mpiError == MPI_ERR_RANK) {
+    }
+
+    mpiError = MPI_Send(const_cast <char*> (schema.c_str()), schema_len, MPI_CHAR, dest, tag, comm);
+
+    if (mpiError == MPI_ERR_COMM) {
+    } else if (mpiError == MPI_ERR_COUNT) {
+    } else if (mpiError == MPI_ERR_TYPE) {
+    } else if (mpiError == MPI_ERR_TAG) {
+    } else if (mpiError == MPI_ERR_RANK) {
+    }
+
+    return MPI_Send(&data[0], data_len, MPI_CHAR, dest, tag, comm);
+}
+
+//---------------------------------------------------------------------------//
+int recv(Node& node, int src, int tag, MPI_Comm comm)
+{  
+    int intArray[2];
+    MPI_Status status;
+
+    int mpiError = MPI_Recv(intArray, 2, MPI_INT, src, tag, comm, &status);
+
+    //Check errors on return value mpiError here
+    if (mpiError == MPI_ERR_COMM) {
+    } else if (mpiError == MPI_ERR_COUNT) {
+    } else if (mpiError == MPI_ERR_TYPE) {
+    } else if (mpiError == MPI_ERR_TAG) {
+    } else if (mpiError == MPI_ERR_RANK) {
+    }
+
+    int schema_len = intArray[0];
+    int data_len = intArray[1];
+
+    char schema[schema_len + 1];
+    char data[data_len + 1];
+
+    mpiError = MPI_Recv(schema, schema_len, MPI_CHAR, src, tag, comm, &status);
+
+    if (mpiError == MPI_ERR_COMM) {
+    } else if (mpiError == MPI_ERR_COUNT) {
+    } else if (mpiError == MPI_ERR_TYPE) {
+    } else if (mpiError == MPI_ERR_TAG) {
+    } else if (mpiError == MPI_ERR_RANK) {
+    }
+
+    mpiError = MPI_Recv(data, data_len, MPI_CHAR, src, tag, comm, &status);
+
+    Generator node_gen(schema, data);
+    /// gen copy 
+    node_gen.walk(node);
+
+    return mpiError;
+}
+    
 //---------------------------------------------------------------------------//
 std::string
 about()
 {
     Node n;
-    about(n);
+    mpi::about(n);
     return n.to_json(true,2);
 }
 
@@ -72,82 +157,20 @@ void
 about(Node &n)
 {
     n.reset();
-    n["version"] = "{alpha}";
-/// TODO: auto include from lic file (at compile time using cmake)
-    n["copyright"] = "\n"
-"Copyright (c) 2014, Lawrence Livermore National Security, LLC \n"
-"Produced at the Lawrence Livermore National Laboratory.  \n"
-"\n"
-"All rights reserved. \n"
-"\n"
-"This source code cannot be distributed without further review from  \n"
-"Lawrence Livermore National Laboratory. \n";
-    // TODO: include compiler info, license info, etc
-
-    // Type Info Map
-    Node &nn = n["native_typemap"];
-
-    // ints
-#ifdef CONDUIT_INT8_NATIVE_TYPENAME
-    nn["int8"] = CONDUIT_INT8_NATIVE_TYPENAME;
-#else
-    nn["int8"] = "<unmapped>";
-#endif
-#ifdef CONDUIT_INT16_NATIVE_TYPENAME
-    nn["int16"] = CONDUIT_INT16_NATIVE_TYPENAME;
-#else
-    nn["int16"] = "<unmapped>";
-#endif
-#ifdef CONDUIT_INT32_NATIVE_TYPENAME
-    nn["int32"] = CONDUIT_INT32_NATIVE_TYPENAME;
-#else
-    nn["int32"] = "<unmapped>";
-#endif
-#ifdef CONDUIT_INT64_NATIVE_TYPENAME
-    nn["int64"] = CONDUIT_INT64_NATIVE_TYPENAME;
-#else
-    nn["int64"] = "<unmapped>";
-#endif
-
-    // unsigned ints
-#ifdef CONDUIT_UINT8_NATIVE_TYPENAME
-    nn["uint8"] = CONDUIT_UINT8_NATIVE_TYPENAME;
-#else
-    nn["uint8"] = "<unmapped>";
-#endif
-#ifdef CONDUIT_UINT16_NATIVE_TYPENAME
-    nn["uint16"] = CONDUIT_UINT16_NATIVE_TYPENAME;
-#else
-    nn["uint16"] = "<unmapped>";
-#endif
-#ifdef CONDUIT_UINT32_NATIVE_TYPENAME
-    nn["uint32"] = CONDUIT_UINT32_NATIVE_TYPENAME;
-#else
-    nn["uint32"] = "<unmapped>";
-#endif
-#ifdef CONDUIT_UINT64_NATIVE_TYPENAME
-    nn["uint64"] = CONDUIT_UINT64_NATIVE_TYPENAME;
-#else
-    nn["uint64"] = "<unmapped>";
-#endif
-
-    // floating points numbers
-#ifdef CONDUIT_FLOAT32_NATIVE_TYPENAME
-    nn["float32"] = CONDUIT_FLOAT32_NATIVE_TYPENAME;
-#else
-    nn["float32"] = "<unmapped>";
-#endif
-#ifdef CONDUIT_FLOAT64_NATIVE_TYPENAME
-    nn["float64"] = CONDUIT_FLOAT64_NATIVE_TYPENAME;
-#else
-    nn["float64"] = "<unmapped>";
-#endif
-
+    n["mpi"] = "enabled";
 }
 
 
-}
+};
+//-----------------------------------------------------------------------------
+// -- end conduit::mpi --
+//-----------------------------------------------------------------------------
+
+
+
+};
 //-----------------------------------------------------------------------------
 // -- end conduit:: --
 //-----------------------------------------------------------------------------
+
 

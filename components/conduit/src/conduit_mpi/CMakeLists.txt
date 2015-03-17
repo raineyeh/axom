@@ -42,28 +42,64 @@
 # 
 ###############################################################################
 
-####################################
-# Helper to add Python Module Tests
-####################################
-function(add_python_unit_test TEST)
-    message(STATUS " [*] Adding Python-based Unit Test: ${TEST}")
-    add_test(NAME ${TEST} COMMAND 
-             ${PYTHON_EXECUTABLE} -B -m unittest -v ${TEST})
-    # make sure python can pick up the modules we built
-    set_property(TEST ${TEST} PROPERTY ENVIRONMENT  "PYTHONPATH=${CMAKE_BINARY_DIR}/python-modules/:${CMAKE_CURRENT_SOURCE_DIR}")
-endfunction(add_python_unit_test)
 
-####################################
-# Add Python Module Tests
-####################################
-set(PYTHON_MODULE_TESTS python_conduit_smoke
-                        python_conduit_node
-                        python_conduit_schema
-                        python_conduit_datatype
-                        python_conduit_node_iterator)
+################################
+# Add the conduit-mpi library
+################################
+
+ENABLE_WARNINGS()
+
+configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/Conduit_MPI_Config.h.in"
+                "${CMAKE_CURRENT_BINARY_DIR}/Conduit_MPI_Config.h")
+
+#
+# Specify all headers
+#            
+set(conduit_mpi_headers 
+    conduit_mpi.h 
+    Conduit_MPI_Exports.h
+    ${CMAKE_CURRENT_BINARY_DIR}/Conduit_MPI_Config.h)
+
+#
+# Specify all sources
+#
+set(conduit_mpi_sources conduit_mpi.cpp)
+
+include_directories(${MPI_CXX_INCLUDE_PATH})
+
+#
+# Note: headers are added here so they show up in project file generators
+# (such as xcode, eclipse, etc)
+#
+add_library(conduit_mpi SHARED ${conduit_mpi_sources} ${conduit_mpi_headers})
+
+# guard against empty mpi params
+if(NOT "${MPI_CXX_COMPILE_FLAGS}" STREQUAL "")
+    set_target_properties(conduit_mpi 
+                                PROPERTIES COMPILE_FLAGS            
+                                ${MPI_CXX_COMPILE_FLAGS} )
+endif()
+
+if(NOT "${MPI_CXX_LINK_FLAGS}" STREQUAL "")
+    set_target_properties(conduit_mpi 
+                                PROPERTIES LINK_FLAGS
+                                ${MPI_CXX_LINK_FLAGS} )
+endif()
+
+#
+# Link with conduit and silo (if enabled)
+#
+target_link_libraries(conduit_mpi conduit ${MPI_CXX_LIBRARIES})
 
 
-foreach(TEST ${PYTHON_MODULE_TESTS})
-    add_python_unit_test(${TEST})
-endforeach()
+##################################
+# Install Targets for conduit lib
+##################################
+
+install(FILES ${conduit_mpi_headers} DESTINATION include)
+install(TARGETS conduit_mpi
+  EXPORT conduit
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
 

@@ -43,7 +43,9 @@
 ###############################################################################
 
 # Find the interpreter first
-set(PYTHON_EXECUTABLE ${PYTHON_DIR}/bin/python)
+if(PYTHON_DIR AND NOT PYTHON_EXECUTABLE)
+    set(PYTHON_EXECUTABLE ${PYTHON_DIR}/bin/python)
+endif()
 
 find_package(PythonInterp REQUIRED)
 if(PYTHONINTERP_FOUND)
@@ -64,6 +66,10 @@ if(PYTHONINTERP_FOUND)
         MESSAGE(STATUS "{PythonLibs from PythonInterp} using: PYTHON_LIBRARY=${PYTHON_LIBRARY}")
         find_package(PythonLibs)
 endif()
+
+
+find_package_handle_standard_args(Python  DEFAULT_MSG
+                                  PYTHON_LIBRARY PYTHON_INCLUDE_DIR)
 
 
 FUNCTION(PYTHON_ADD_DISTUTILS_SETUP target_name dest_dir setup_file)

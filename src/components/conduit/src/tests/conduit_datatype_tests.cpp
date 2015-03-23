@@ -44,7 +44,7 @@
 
 //-----------------------------------------------------------------------------
 ///
-/// file: conduit_array.cpp
+/// file: type_tests.cpp
 ///
 //-----------------------------------------------------------------------------
 
@@ -53,122 +53,59 @@
 #include <iostream>
 #include "gtest/gtest.h"
 
+
 using namespace conduit;
 
-//-----------------------------------------------------------------------------
-TEST(conduit_array, array_stride_int8)
-{
-    std::vector<int8> data(20,0);
-
-    for(int i=0;i<20;i+=2)
-    {
-        data[i] = i/2;
-    }
-
-    for(int i=1;i<20;i+=2)
-    {
-        data[i] = -i/2;
-    }
-    std::cout << "Full Data" << std::endl;
-
-    for(int i=0;i<20;i++)
-    {
-        std::cout << (int64) data[i] << " ";
-    }
-    std::cout << std::endl;
- 
-    DataType arr_t(DataType::INT8_T,
-                   10,
-                   0,
-                   sizeof(int8)*2, // stride
-                   sizeof(int8),
-                   Endianness::DEFAULT_T);
-    Node n;
-    n["value"].set_external(arr_t,&data[0]);
-
-
-    int8_array arr = n["value"].as_int8_array();
-
-    for(int i=0;i<10;i++)
-    {
-        // note: the cast is for proper printing to std::out
-        std::cout << "value[" << i << "] = " << ((int64)arr[i] ) << std::endl;
-    }
-    std::cout << std::endl;
-
-    EXPECT_EQ(arr[5],5);
-    EXPECT_EQ(arr[9],9);
-
-    arr[1] = 100;
-    EXPECT_EQ(data[2],100);
-    
-        std::cout << "Full Data" << std::endl;
-
-    for(int i=0;i<20;i++)
-    {
-        std::cout << (int64) data[i] << " ";
-    }
-    std::cout << std::endl;
-
-
-    Node n2(DataType::int8(10,sizeof(int8),sizeof(int8)*2),
-            &data[0],
-            true); /// true for external
-
-    int8_array arr_2 = n2.as_int8_array();
-    
-    for(int i=0;i<10;i++)
-    {
-        // note: the cast is for proper printing to std::out
-        std::cout << "value[" << i << "] = " <<  ((int64)arr_2[i] ) << std::endl;
-    }
-    std::cout << std::endl;
-    
-    EXPECT_EQ(arr_2[0],0);
-    EXPECT_EQ(arr_2[9],-9);   
-
-}    
 
 //-----------------------------------------------------------------------------
-TEST(conduit_array, array_stride_int8_external)
+void print_dt(const DataType &dtype)
 {
-    std::vector<int64> data(20,0);
+    std::cout << dtype.to_json() << std::endl;
+}
 
-    for(int i=0;i<20;i+=2)
-    {
-        data[i] = i/2;
-    }
+//-----------------------------------------------------------------------------
+TEST(type_tests, value_print)
+{
+    EXPECT_EQ(DataType::EMPTY_T,0);
+    EXPECT_EQ(DataType::id_to_name(DataType::EMPTY_T),"[empty]");
+    EXPECT_EQ(DataType::name_to_id("[empty]"),DataType::EMPTY_T);
+    EXPECT_TRUE( (DataType::EMPTY_T != DataType::OBJECT_T) );
 
-    for(int i=1;i<20;i+=2)
-    {
-        data[i] = -i/2;
-    }
-    std::cout << "Full Data" << std::endl;
+    print_dt(DataType::empty());
+    print_dt(DataType::object());
+    print_dt(DataType::list());
+    
+    print_dt(DataType::int8());
+    print_dt(DataType::int16());
+    print_dt(DataType::int32());
+    print_dt(DataType::int64());
 
-    for(int i=0;i<20;i++)
-    {
-        std::cout << (int64) data[i] << " ";
-    }
-    std::cout << std::endl;
- 
-    Node n;
-    n["value"].set_external(data);
+    print_dt(DataType::uint8());
+    print_dt(DataType::uint16());
+    print_dt(DataType::uint32());
+    print_dt(DataType::uint64());
 
-    int64_array arr = n["value"].as_int64_array();
+    print_dt(DataType::float32());
+    print_dt(DataType::float64());
 
-    for(int i=0;i<20;i++)
-    {
-        // note: the cast is for proper printing to std::out
-        std::cout << "value[" << i << "] = " << arr[i] << std::endl;
-    }
-    std::cout << std::endl;
+}
 
-    data[2]*=10;
-    data[3]*=10;
+//-----------------------------------------------------------------------------
+TEST(type_tests, c_types_value_print)
+{
+    
+    print_dt(DataType::c_char());
+    print_dt(DataType::c_short());
+    print_dt(DataType::c_int());
+    print_dt(DataType::c_long());
 
-    EXPECT_EQ(arr[2],10);
-    EXPECT_EQ(arr[3],-10);
+    print_dt(DataType::c_unsigned_char());
+    print_dt(DataType::c_unsigned_short());
+    print_dt(DataType::c_unsigned_int());
+    print_dt(DataType::c_unsigned_long());
 
+    print_dt(DataType::c_float());
+    print_dt(DataType::c_double());
 }
 
 

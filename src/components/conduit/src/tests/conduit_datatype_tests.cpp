@@ -44,79 +44,68 @@
 
 //-----------------------------------------------------------------------------
 ///
-/// file: Utils.h
+/// file: type_tests.cpp
 ///
 //-----------------------------------------------------------------------------
 
-#ifndef __CONDUIT_UTILS_H
-#define __CONDUIT_UTILS_H
+#include "conduit.h"
 
-//-----------------------------------------------------------------------------
-// -- conduit library includes -- 
-//-----------------------------------------------------------------------------
-#include "Core.h"
-
-//-----------------------------------------------------------------------------
-// -- standard lib includes -- 
-//-----------------------------------------------------------------------------
-#include <string>
 #include <iostream>
-#include <iomanip>
-#include <sstream>
+#include "gtest/gtest.h"
+
+
+using namespace conduit;
+
 
 //-----------------------------------------------------------------------------
-// -- begin conduit:: --
-//-----------------------------------------------------------------------------
-namespace conduit
+void print_dt(const DataType &dtype)
 {
-
-//-----------------------------------------------------------------------------
-// -- begin conduit::utils --
-//-----------------------------------------------------------------------------
-namespace utils
-{
-
-//-----------------------------------------------------------------------------
-    void CONDUIT_API split_string(const std::string &path,
-                                  const std::string &sep,
-                                  std::string &curr,
-                                  std::string &next);
-
-    void CONDUIT_API rsplit_string(const std::string &path,
-                                   const std::string &sep,
-                                   std::string &curr,
-                                   std::string &next);
-
-    void  CONDUIT_API split_path(const std::string &path,
-                                 std::string &curr,
-                                 std::string &next);
-
-//-----------------------------------------------------------------------------
-     std::string json_sanitize(const std::string &json);
-     
-//----------------------------------------------------------------------------- 
-     template< typename T >
-     std::string to_hex_string(T value)
-     {
-           std::stringstream oss;
-           oss << std::hex << value;
-           return  oss.str();
-     }
-
-//-----------------------------------------------------------------------------
-     void CONDUIT_API indent(std:: ostringstream &oss,
-                             index_t indent,
-                             index_t depth,
-                             const std::string &pad);
-     
+    std::cout << dtype.to_json() << std::endl;
 }
+
 //-----------------------------------------------------------------------------
-// -- end conduit::utils --
-//-----------------------------------------------------------------------------
+TEST(type_tests, value_print)
+{
+    EXPECT_EQ(DataType::EMPTY_T,0);
+    EXPECT_EQ(DataType::id_to_name(DataType::EMPTY_T),"[empty]");
+    EXPECT_EQ(DataType::name_to_id("[empty]"),DataType::EMPTY_T);
+    EXPECT_TRUE( (DataType::EMPTY_T != DataType::OBJECT_T) );
+
+    print_dt(DataType::empty());
+    print_dt(DataType::object());
+    print_dt(DataType::list());
+    
+    print_dt(DataType::int8());
+    print_dt(DataType::int16());
+    print_dt(DataType::int32());
+    print_dt(DataType::int64());
+
+    print_dt(DataType::uint8());
+    print_dt(DataType::uint16());
+    print_dt(DataType::uint32());
+    print_dt(DataType::uint64());
+
+    print_dt(DataType::float32());
+    print_dt(DataType::float64());
 
 }
-//-----------------------------------------------------------------------------
-// -- end conduit:: --
-//-----------------------------------------------------------------------------
 
-#endif
+//-----------------------------------------------------------------------------
+TEST(type_tests, c_types_value_print)
+{
+    
+    print_dt(DataType::c_char());
+    print_dt(DataType::c_short());
+    print_dt(DataType::c_int());
+    print_dt(DataType::c_long());
+
+    print_dt(DataType::c_unsigned_char());
+    print_dt(DataType::c_unsigned_short());
+    print_dt(DataType::c_unsigned_int());
+    print_dt(DataType::c_unsigned_long());
+
+    print_dt(DataType::c_float());
+    print_dt(DataType::c_double());
+}
+
+

@@ -134,7 +134,6 @@ void
 Schema::reset()
 {
     release();
-    init_defaults();
 }
 
 //-----------------------------------------------------------------------------
@@ -187,7 +186,8 @@ void
 Schema::set(index_t dtype_id)
 {
     reset();
-    m_dtype.set(dtype_id);
+    m_dtype.reset();
+    m_dtype.set_id(dtype_id);
 }
 
 
@@ -399,7 +399,7 @@ Schema::save(const std::string &ofname,
     std::ofstream ofile;
     ofile.open(ofname.c_str());
     if(!ofile.is_open())
-        THROW_ERROR("<Schema::save> failed to open: " << ofname);
+        CONDUIT_ERROR("<Schema::save> failed to open: " << ofname);
     ofile << oss.str();
     ofile.close();
 }
@@ -412,7 +412,7 @@ Schema::load(const std::string &ifname)
     std::ifstream ifile;
     ifile.open(ifname.c_str());
     if(!ifile.is_open())
-        THROW_ERROR("<Schema::load> failed to open: " << ifname);
+        CONDUIT_ERROR("<Schema::load> failed to open: " << ifname);
     std::string res((std::istreambuf_iterator<char>(ifile)), std::istreambuf_iterator<char>());
     set(res);
 }            
@@ -468,13 +468,13 @@ Schema::remove(index_t idx)
     index_t dtype_id = m_dtype.id();
     if(! (dtype_id == DataType::LIST_T || dtype_id == DataType::OBJECT_T))
     {
-        THROW_ERROR("<Schema::remove> Schema is not LIST_T or OBJECT_T, dtype is" << DataType::id_to_name(dtype_id));
+        CONDUIT_ERROR("<Schema::remove> Schema is not LIST_T or OBJECT_T, dtype is" << DataType::id_to_name(dtype_id));
     }
     
     std::vector<Schema*>  &chldrn = children();
     if(idx > chldrn.size())
     {
-        THROW_ERROR("<Schema::remove> Invalid index:" 
+        CONDUIT_ERROR("<Schema::remove> Invalid index:" 
                     << idx << ">" << chldrn.size() <<  "(list_size)");
     }
 
@@ -521,7 +521,7 @@ Schema::fetch_child(const std::string &path)
 {
     // fetch w/ path forces OBJECT_T
     if(m_dtype.id() != DataType::OBJECT_T)
-        THROW_ERROR("<Schema::child[OBJECT_T]>: Schema is not OBJECT_T");
+        CONDUIT_ERROR("<Schema::child[OBJECT_T]>: Schema is not OBJECT_T");
 
     std::string p_curr;
     std::string p_next;
@@ -553,7 +553,7 @@ Schema::fetch_child(const std::string &path) const
 {
     // fetch w/ path forces OBJECT_T
     if(m_dtype.id() != DataType::OBJECT_T)
-        THROW_ERROR("<Schema::child[OBJECT_T]>: Schema is not OBJECT_T");
+        CONDUIT_ERROR("<Schema::child[OBJECT_T]>: Schema is not OBJECT_T");
 
     std::string p_curr;
     std::string p_next;
@@ -592,7 +592,7 @@ Schema::child_index(const std::string &path) const
         ///
         /// TODO: Full path errors would be nice here. 
         ///
-        THROW_ERROR("<Schema::child_index[OBJECT_T]>"
+        CONDUIT_ERROR("<Schema::child_index[OBJECT_T]>"
                     << "Attempt to access invalid child:" << path);
                       
     }
@@ -615,7 +615,7 @@ Schema::fetch(const std::string &path)
     // check for parent
     if(p_curr == "..")
     {
-        if(m_parent != NULL) // TODO: check for erro (no parent)
+        if(m_parent != NULL) // TODO: check for error (no parent)
            return m_parent->fetch(p_next);
     }
     
@@ -671,7 +671,7 @@ Schema::has_path(const std::string &path) const
     if(m_dtype.id() == DataType::EMPTY_T)
         return false;
     if(m_dtype.id() != DataType::OBJECT_T)
-        THROW_ERROR("<Schema::has_path[OBJECT_T]> Schema is not OBJECT_T");
+        CONDUIT_ERROR("<Schema::has_path[OBJECT_T]> Schema is not OBJECT_T");
 
     std::string p_curr;
     std::string p_next;
@@ -712,7 +712,7 @@ void
 Schema::remove(const std::string &path)
 {
     if(m_dtype.id() != DataType::OBJECT_T)
-        THROW_ERROR("<Schema::remove[OBJECT_T]> Schema is not OBJECT_T");
+        CONDUIT_ERROR("<Schema::remove[OBJECT_T]> Schema is not OBJECT_T");
 
     std::string p_curr;
     std::string p_next;
@@ -738,12 +738,23 @@ Schema::remove(const std::string &path)
     }    
 }
 
+//---------------------------------------------------------------------------//
+Schema &
+Schema::append()
+{
+    init_list();
+    init_list();
+    Schema *sch = new Schema();
+    children().push_back(sch);
+    return *sch;
+}
+
 
 //=============================================================================
 //-----------------------------------------------------------------------------
 //
 //
-// -- begin conduit::Schema public methods --
+// -- begin conduit::Schema private methods --
 //
 //
 //-----------------------------------------------------------------------------
@@ -760,10 +771,9 @@ Schema::remove(const std::string &path)
 void
 Schema::init_defaults()
 {
-    m_dtype  = DataType::Objects::empty();
+    m_dtype  = DataType::empty();
     m_hierarchy_data = NULL;
     m_parent = NULL;
-    m_root   = false;
 }
 
 //---------------------------------------------------------------------------//
@@ -773,7 +783,7 @@ Schema::init_object()
     if(dtype().id() != DataType::OBJECT_T)
     {
         reset();
-        m_dtype  = DataType::Objects::object();
+        m_dtype  = DataType::object();
         m_hierarchy_data = new Schema_Object_Hierarchy();
     }
 }
@@ -785,7 +795,7 @@ Schema::init_list()
     if(dtype().id() != DataType::LIST_T)
     {
         reset();
-        m_dtype  = DataType::Objects::list();
+        m_dtype  = DataType::list();
         m_hierarchy_data = new Schema_List_Hierarchy();
     }
 }
@@ -813,6 +823,9 @@ Schema::release()
     { 
         delete list_hierarchy();
     }
+
+    m_dtype  = DataType::empty();
+    m_hierarchy_data = NULL;
 }
 
 
@@ -848,8 +861,7 @@ Schema::compact_to(Schema &s_dest, index_t curr_offset) const
         for(index_t i=0; i < nchildren ;i++)
         {            
             Schema  *cld_src = children()[i];
-            s_dest.append();
-            Schema &cld_dest = s_dest.child(i);
+            Schema &cld_dest = s_dest.append();
             cld_src->compact_to(cld_dest,curr_offset);
             curr_offset += cld_dest.total_bytes();
         }

@@ -44,101 +44,68 @@
 
 //-----------------------------------------------------------------------------
 ///
-/// file: conduit_node_iterator.cpp
+/// file: type_tests.cpp
 ///
 //-----------------------------------------------------------------------------
-
 
 #include "conduit.h"
 
 #include <iostream>
 #include "gtest/gtest.h"
 
+
 using namespace conduit;
 
+
 //-----------------------------------------------------------------------------
-TEST(conduit_node_iterator, simple_1)
+void print_dt(const DataType &dtype)
 {
+    std::cout << dtype.to_json() << std::endl;
+}
 
-    uint32   a_val  = 10;
-    uint32   b_val  = 20;
+//-----------------------------------------------------------------------------
+TEST(type_tests, value_print)
+{
+    EXPECT_EQ(DataType::EMPTY_T,0);
+    EXPECT_EQ(DataType::id_to_name(DataType::EMPTY_T),"[empty]");
+    EXPECT_EQ(DataType::name_to_id("[empty]"),DataType::EMPTY_T);
+    EXPECT_TRUE( (DataType::EMPTY_T != DataType::OBJECT_T) );
 
-    Node n;
-    n["a"] = a_val;
-    n["b"] = b_val;
-
-    EXPECT_EQ(n["a"].as_uint32(),a_val);
-    EXPECT_EQ(n["b"].as_uint32(),b_val);
-
-    std::cout << n.to_json();
+    print_dt(DataType::empty());
+    print_dt(DataType::object());
+    print_dt(DataType::list());
     
-    NodeIterator itr = n.iterator();
-    Node itr_info;
-    itr.info(itr_info);
-    std::cout <<itr_info.to_json(true) << std::endl;
+    print_dt(DataType::int8());
+    print_dt(DataType::int16());
+    print_dt(DataType::int32());
+    print_dt(DataType::int64());
+
+    print_dt(DataType::uint8());
+    print_dt(DataType::uint16());
+    print_dt(DataType::uint32());
+    print_dt(DataType::uint64());
+
+    print_dt(DataType::float32());
+    print_dt(DataType::float64());
+
+}
+
+//-----------------------------------------------------------------------------
+TEST(type_tests, c_types_value_print)
+{
     
-    index_t i = 0;
-    while(itr.has_next())
-    {
-        Node &n = itr.next();
-        
-        if(i == 0)
-        {
-            EXPECT_EQ("a",itr.path());
-            EXPECT_EQ(i,itr.index());
-            EXPECT_EQ(a_val,n.as_uint32());
-        }
-        else if(i == 1)
-        {
-            EXPECT_EQ("b",itr.path());
-            EXPECT_EQ(i,itr.index());
-            EXPECT_EQ(b_val,n.as_uint32());
-        }
-        i++;
-    }
-    
-    i = 0;
-    while(itr.has_previous())
-    {
-        Node &n = itr.previous();
-        
-        if(i == 1)
-        {
-            EXPECT_EQ("a",itr.path());
-            EXPECT_EQ(i,itr.index());
-            EXPECT_EQ(a_val,n.as_uint32());
-        }
-        else if(i == 2)
-        {
-            EXPECT_EQ("b",itr.path());
-            EXPECT_EQ(i,itr.index());
-            EXPECT_EQ(b_val,n.as_uint32());
-        }
-        i++;
-    }
+    print_dt(DataType::c_char());
+    print_dt(DataType::c_short());
+    print_dt(DataType::c_int());
+    print_dt(DataType::c_long());
+
+    print_dt(DataType::c_unsigned_char());
+    print_dt(DataType::c_unsigned_short());
+    print_dt(DataType::c_unsigned_int());
+    print_dt(DataType::c_unsigned_long());
+
+    print_dt(DataType::c_float());
+    print_dt(DataType::c_double());
 }
 
 
-//-----------------------------------------------------------------------------
-TEST(conduit_node_iterator, empty)
-{
-    uint32   a_val  = 10;
-    uint32   b_val  = 20;
-
-    Node n;
-    n["a"] = a_val;
-    n["b"] = b_val;
-    n["c"]; // empty
-
-
-    NodeIterator itr = n.iterator();
-    while(itr.has_next())
-    {
-        Node &n = itr.next();
-        n.print();
-    }
-    
-    itr = n["c"].iterator();
-    EXPECT_FALSE(itr.has_next());    
-    
-}

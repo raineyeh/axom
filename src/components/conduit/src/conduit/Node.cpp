@@ -76,6 +76,26 @@
 #endif
 
 //-----------------------------------------------------------------------------
+//
+/// The CONDUIT_ASSERT_DTYPE macro is used to check the dtype for leaf access
+/// methods.
+//-----------------------------------------------------------------------------
+#define CONDUIT_ASSERT_DTYPE( dtype_id, dtype_id_expect, msg )      \
+{                                                                   \
+    if(dtype_id != dtype_id_expect)                                 \
+    {                                                               \
+        std::ostringstream assert_dtype_oss;                        \
+        assert_dtype_oss << "DataType "                             \
+            << DataType::id_to_name(dtype_id)                       \
+            << " does not equal expected DataType "                 \
+            << DataType::id_to_name(dtype_id_expect)                \
+            << " " << msg;                                          \
+        CONDUIT_ASSERT( (dtype_id == dtype_id_expect) ,             \
+                         assert_dtype_oss.str());                   \
+    }                                                               \
+}                                                                   \
+
+//-----------------------------------------------------------------------------
 // -- begin conduit:: --
 //-----------------------------------------------------------------------------
 namespace conduit
@@ -330,7 +350,7 @@ Node::load(const Schema &schema,
     std::ifstream ifs;
     ifs.open(stream_path.c_str());
     if(!ifs.is_open())
-        THROW_ERROR("<Node::load> failed to open: " << stream_path);
+        CONDUIT_ERROR("<Node::load> failed to open: " << stream_path);
     ifs.read((char *)m_data,dsize);
     ifs.close();
 
@@ -437,7 +457,7 @@ Node::set(const Node &node)
 {
     if(node.dtype().id() == DataType::OBJECT_T)
     {
-        init(DataType::Objects::object());
+        init(DataType::object());
         std::vector<std::string> paths;
         node.paths(paths);
 
@@ -455,7 +475,7 @@ Node::set(const Node &node)
     }
     else if(node.dtype().id() == DataType::LIST_T)       
     {   
-        init(DataType::Objects::list());
+        init(DataType::list());
         for(index_t i=0;i<node.m_children.size();i++)
         {
             this->m_schema->append();
@@ -532,7 +552,7 @@ Node::set(const DataType &dtype, void *data)
 void 
 Node::set(int8 data)
 {
-    init(DataType::Scalars::int8());
+    init(DataType::int8());
     *(int8*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -541,7 +561,7 @@ Node::set(int8 data)
 void 
 Node::set(int16 data)
 {
-    init(DataType::Scalars::int16());
+    init(DataType::int16());
     *(int16*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -550,7 +570,7 @@ Node::set(int16 data)
 void 
 Node::set(int32 data)
 {
-    init(DataType::Scalars::int32());
+    init(DataType::int32());
     *(int32*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -559,7 +579,7 @@ Node::set(int32 data)
 void 
 Node::set(int64 data)
 {
-    init(DataType::Scalars::int64());
+    init(DataType::int64());
     *(int64*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -571,7 +591,7 @@ Node::set(int64 data)
 void 
 Node::set(uint8 data)
 {
-    init(DataType::Scalars::uint8());
+    init(DataType::uint8());
     *(uint8*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -580,7 +600,7 @@ Node::set(uint8 data)
 void 
 Node::set(uint16 data)
 {
-    init(DataType::Scalars::uint16());
+    init(DataType::uint16());
     *(uint16*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -589,7 +609,7 @@ Node::set(uint16 data)
 void 
 Node::set(uint32 data)
 {
-    init(DataType::Scalars::uint32());
+    init(DataType::uint32());
     *(uint32*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -598,7 +618,7 @@ Node::set(uint32 data)
 void 
 Node::set(uint64 data)
 {
-    init(DataType::Scalars::uint64());
+    init(DataType::uint64());
     *(uint64*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -610,7 +630,7 @@ Node::set(uint64 data)
 void 
 Node::set(float32 data)
 {
-    init(DataType::Scalars::float32());
+    init(DataType::float32());
     *(float32*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -619,7 +639,7 @@ Node::set(float32 data)
 void 
 Node::set(float64 data)
 {
-    init(DataType::Scalars::float64());
+    init(DataType::float64());
     *(float64*)((char*)m_data + schema().element_index(0)) = data;
 }
 
@@ -793,7 +813,7 @@ Node::set(const std::vector<float64>  &data)
 void 
 Node::set(const int8_array  &data)
 {
-    init(DataType::Arrays::int8(data.number_of_elements()));
+    init(DataType::int8(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -801,7 +821,7 @@ Node::set(const int8_array  &data)
 void 
 Node::set(const int16_array  &data)
 {
-    init(DataType::Arrays::int16(data.number_of_elements()));
+    init(DataType::int16(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -809,7 +829,7 @@ Node::set(const int16_array  &data)
 void 
 Node::set(const int32_array  &data)
 {
-    init(DataType::Arrays::int32(data.number_of_elements()));
+    init(DataType::int32(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -817,7 +837,7 @@ Node::set(const int32_array  &data)
 void 
 Node::set(const int64_array  &data)
 {
-    init(DataType::Arrays::int64(data.number_of_elements()));
+    init(DataType::int64(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -830,7 +850,7 @@ Node::set(const int64_array  &data)
 void 
 Node::set(const uint8_array  &data)
 {
-    init(DataType::Arrays::uint8(data.number_of_elements()));
+    init(DataType::uint8(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -838,7 +858,7 @@ Node::set(const uint8_array  &data)
 void 
 Node::set(const uint16_array  &data)
 {
-    init(DataType::Arrays::uint16(data.number_of_elements()));
+    init(DataType::uint16(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -846,7 +866,7 @@ Node::set(const uint16_array  &data)
 void 
 Node::set(const uint32_array  &data)
 {
-    init(DataType::Arrays::uint32(data.number_of_elements()));
+    init(DataType::uint32(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -854,7 +874,7 @@ Node::set(const uint32_array  &data)
 void 
 Node::set(const uint64_array  &data)
 {
-    init(DataType::Arrays::uint64(data.number_of_elements()));
+    init(DataType::uint64(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -866,7 +886,7 @@ Node::set(const uint64_array  &data)
 void 
 Node::set(const float32_array  &data)
 {
-    init(DataType::Arrays::float32(data.number_of_elements()));
+    init(DataType::float32(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -874,7 +894,7 @@ Node::set(const float32_array  &data)
 void 
 Node::set(const float64_array  &data)
 {
-    init(DataType::Arrays::float64(data.number_of_elements()));
+    init(DataType::float64(data.number_of_elements()));
     data.compact_elements_to((uint8*)m_data);
 }
 
@@ -938,7 +958,7 @@ Node::set(int8  *data,
           index_t element_bytes,
           index_t endianness)
 {
-    set(int8_array(data,DataType::Arrays::int8(num_elements,
+    set(int8_array(data,DataType::int8(num_elements,
                                                offset,
                                                stride,
                                                element_bytes,
@@ -955,7 +975,7 @@ Node::set(int16 *data,
           index_t element_bytes,
           index_t endianness)
 {
-    set(int16_array(data,DataType::Arrays::int16(num_elements,
+    set(int16_array(data,DataType::int16(num_elements,
                                                  offset,
                                                  stride,
                                                  element_bytes,
@@ -971,7 +991,7 @@ Node::set(int32 *data,
          index_t element_bytes,
          index_t endianness)
 {
-    set(int32_array(data,DataType::Arrays::int32(num_elements,
+    set(int32_array(data,DataType::int32(num_elements,
                                                  offset,
                                                  stride,
                                                  element_bytes,
@@ -986,7 +1006,7 @@ Node::set(int64 *data,
          index_t element_bytes,
          index_t endianness)
 {
-    set(int64_array(data,DataType::Arrays::int64(num_elements,
+    set(int64_array(data,DataType::int64(num_elements,
                                                  offset,
                                                  stride,
                                                  element_bytes,
@@ -1008,7 +1028,7 @@ Node::set(uint8  *data,
           index_t element_bytes,
           index_t endianness)
 {
-    set(uint8_array(data,DataType::Arrays::uint8(num_elements,
+    set(uint8_array(data,DataType::uint8(num_elements,
                                                  offset,
                                                  stride,
                                                  element_bytes,
@@ -1025,7 +1045,7 @@ Node::set(uint16 *data,
          index_t element_bytes,
          index_t endianness)
 {
-    set(uint16_array(data,DataType::Arrays::uint16(num_elements,
+    set(uint16_array(data,DataType::uint16(num_elements,
                                                    offset,
                                                    stride,
                                                    element_bytes,
@@ -1041,7 +1061,7 @@ Node::set(uint32 *data,
          index_t element_bytes,
          index_t endianness)
 {
-    set(uint32_array(data,DataType::Arrays::uint32(num_elements,
+    set(uint32_array(data,DataType::uint32(num_elements,
                                                    offset,
                                                    stride,
                                                    element_bytes,
@@ -1057,7 +1077,7 @@ Node::set(uint64 *data,
          index_t element_bytes,
          index_t endianness)
 {
-    set(uint64_array(data,DataType::Arrays::uint64(num_elements,
+    set(uint64_array(data,DataType::uint64(num_elements,
                                                    offset,
                                                    stride,
                                                    element_bytes,
@@ -1078,7 +1098,7 @@ Node::set(float32 *data,
          index_t element_bytes,
          index_t endianness)
 {
-    set(float32_array(data,DataType::Arrays::float32(num_elements,
+    set(float32_array(data,DataType::float32(num_elements,
                                                      offset,
                                                      stride,
                                                      element_bytes,
@@ -1094,7 +1114,7 @@ Node::set(float64 *data,
          index_t element_bytes,
          index_t endianness)
 {
-    set(float64_array(data,DataType::Arrays::float64(num_elements,
+    set(float64_array(data,DataType::float64(num_elements,
                                                      offset,
                                                      stride,
                                                      element_bytes,
@@ -1699,7 +1719,7 @@ Node::set_external(int8 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::int8(num_elements,
+    m_schema->set(DataType::int8(num_elements,
                                          offset,
                                          stride,
                                          element_bytes,
@@ -1717,7 +1737,7 @@ Node::set_external(int16 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::int16(num_elements,
+    m_schema->set(DataType::int16(num_elements,
                                           offset,
                                           stride,
                                           element_bytes,
@@ -1735,7 +1755,7 @@ Node::set_external(int32 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::int32(num_elements,
+    m_schema->set(DataType::int32(num_elements,
                                           offset,
                                           stride,
                                           element_bytes,
@@ -1754,7 +1774,7 @@ Node::set_external(int64 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::int64(num_elements,
+    m_schema->set(DataType::int64(num_elements,
                                           offset,
                                           stride,
                                           element_bytes,
@@ -1778,7 +1798,7 @@ Node::set_external(uint8 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::uint8(num_elements,
+    m_schema->set(DataType::uint8(num_elements,
                                           offset,
                                           stride,
                                           element_bytes,
@@ -1798,7 +1818,7 @@ Node::set_external(uint16 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::uint16(num_elements,
+    m_schema->set(DataType::uint16(num_elements,
                                            offset,
                                            stride,
                                            element_bytes,
@@ -1817,7 +1837,7 @@ Node::set_external(uint32 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::uint32(num_elements,
+    m_schema->set(DataType::uint32(num_elements,
                                            offset,
                                            stride,
                                            element_bytes,
@@ -1835,7 +1855,7 @@ Node::set_external(uint64 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::uint64(num_elements,
+    m_schema->set(DataType::uint64(num_elements,
                                            offset,
                                            stride,
                                            element_bytes,
@@ -1857,7 +1877,7 @@ Node::set_external(float32 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::float32(num_elements,
+    m_schema->set(DataType::float32(num_elements,
                                             offset,
                                             stride,
                                             element_bytes,
@@ -1876,7 +1896,7 @@ Node::set_external(float64 *data,
                    index_t endianness)
 {
     release();
-    m_schema->set(DataType::Arrays::float64(num_elements,
+    m_schema->set(DataType::float64(num_elements,
                                             offset,
                                             stride,
                                             element_bytes,
@@ -1900,7 +1920,7 @@ void
 Node::set_external(std::vector<int8>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::int8((index_t)data.size()));
+    m_schema->set(DataType::int8((index_t)data.size()));
     m_data  = &data[0];
 }
     
@@ -1910,7 +1930,7 @@ void
 Node::set_external(std::vector<int16>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::int16((index_t)data.size()));
+    m_schema->set(DataType::int16((index_t)data.size()));
     m_data  = &data[0];
 }
 
@@ -1919,7 +1939,7 @@ void
 Node::set_external(std::vector<int32>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::int32((index_t)data.size()));
+    m_schema->set(DataType::int32((index_t)data.size()));
     m_data  = &data[0];
 }
 
@@ -1928,7 +1948,7 @@ void
 Node::set_external(std::vector<int64>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::int64((index_t)data.size()));
+    m_schema->set(DataType::int64((index_t)data.size()));
     m_data  = &data[0];
 }
 
@@ -1941,7 +1961,7 @@ void
 Node::set_external(std::vector<uint8>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::uint8((index_t)data.size()));
+    m_schema->set(DataType::uint8((index_t)data.size()));
     m_data  = &data[0];
 }
 
@@ -1951,7 +1971,7 @@ void
 Node::set_external(std::vector<uint16>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::uint16((index_t)data.size()));
+    m_schema->set(DataType::uint16((index_t)data.size()));
     m_data  = &data[0];
 }
 
@@ -1961,7 +1981,7 @@ void
 Node::set_external(std::vector<uint32>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::uint32((index_t)data.size()));
+    m_schema->set(DataType::uint32((index_t)data.size()));
     m_data  = &data[0];
 }
 
@@ -1970,7 +1990,7 @@ void
 Node::set_external(std::vector<uint64>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::uint64((index_t)data.size()));
+    m_schema->set(DataType::uint64((index_t)data.size()));
     m_data  = &data[0];
 }
 
@@ -1983,7 +2003,7 @@ void
 Node::set_external(std::vector<float32>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::float32((index_t)data.size()));
+    m_schema->set(DataType::float32((index_t)data.size()));
     m_data  = &data[0];
 }
 
@@ -1992,7 +2012,7 @@ void
 Node::set_external(std::vector<float64>  &data)
 {
     release();
-    m_schema->set(DataType::Arrays::float64((index_t)data.size()));
+    m_schema->set(DataType::float64((index_t)data.size()));
     m_data  = &data[0];
 }
 
@@ -2941,7 +2961,7 @@ Node::serialize(const std::string &stream_path) const
     std::ofstream ofs;
     ofs.open(stream_path.c_str());
     if(!ofs.is_open())
-        THROW_ERROR("<Node::serialize> failed to open: " << stream_path);
+        CONDUIT_ERROR("<Node::serialize> failed to open: " << stream_path);
     serialize(ofs);
     ofs.close();
 }
@@ -3034,7 +3054,6 @@ void
 Node::update(Node &n_src)
 {
     // walk src and add it contents to this node
-    // OBJECT_T is the only special case here?
     /// TODO:
     /// arrays and non empty leafs will simply overwrite the current
     /// node, these semantics seem sensible, but we could revisit this
@@ -3051,6 +3070,30 @@ Node::update(Node &n_src)
             fetch(ent_name).update(n_src.fetch(ent_name));
         }
     }
+    else if( dtype_id == DataType::LIST_T)
+    {
+        // if we are already a list type, then call update on the children
+        //  in the list
+        index_t src_idx = 0;
+        index_t src_num_children = n_src.number_of_children();
+        if( dtype().id() == DataType::LIST_T)
+        {
+            index_t num_children = number_of_children();
+            for(index_t idx=0; 
+                (idx < num_children and idx < src_num_children); 
+                idx++)
+            {
+                child(idx).update(n_src.child(idx));
+                src_idx++;
+            }
+        }
+        // if the current node is not a list, or if the src has more children
+        // than the current node, use append to capture the nodes
+        for(index_t idx = src_idx; idx < src_num_children;idx++)
+        {
+            append().update(n_src.child(idx));
+        }
+    }
     else if(dtype_id != DataType::EMPTY_T)
     {
         if(this->dtype().is_compatible(n_src.dtype()))
@@ -3059,11 +3102,81 @@ Node::update(Node &n_src)
                    n_src.element_pointer(0), 
                    m_schema->total_bytes());
         }
+        else if( (this->dtype().id() == n_src.dtype().id()) &&
+                 (this->dtype().number_of_elements() >=  
+                   n_src.dtype().number_of_elements())) 
+        {
+            for(index_t idx = 0;
+                idx < n_src.dtype().number_of_elements();
+                idx++)
+            {
+                memcpy(element_pointer(idx),
+                       n_src.element_pointer(idx), 
+                       this->dtype().element_bytes());
+            }
+        }
         else // not compatible
         {
             n_src.compact_to(*this);
         }
-        //set(n_src);
+    }
+}
+//-----------------------------------------------------------------------------
+// -- endian related --
+//-----------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------//
+void
+Node::endian_swap(index_t endianness)
+{
+    index_t dtype_id = dtype().id();
+
+    if (dtype_id == DataType::OBJECT_T || dtype_id == DataType::LIST_T )
+    {
+        for(index_t i=0;i<number_of_children();i++)
+        {
+            child(i).endian_swap(endianness);
+        }
+    }
+    else
+    {
+        index_t num_ele   = dtype().number_of_elements();
+        //note: we always use the default bytes type for endian swap
+        index_t ele_bytes = DataType::default_bytes(dtype_id);
+
+        index_t src_endian  = dtype().endianness();
+        index_t dest_endian = endianness;
+    
+        if(src_endian == Endianness::DEFAULT_T)
+        {
+            src_endian = Endianness::machine_default();
+        }
+    
+        if(dest_endian == Endianness::DEFAULT_T)
+        {
+            dest_endian = Endianness::machine_default();
+        }
+        
+        if(src_endian != dest_endian)
+        {
+            if(ele_bytes == 2)
+            {
+                for(index_t i=0;i<num_ele;i++)
+                    Endianness::swap16(element_pointer(i));
+            }
+            else if(ele_bytes == 4)
+            {
+                for(index_t i=0;i<num_ele;i++)
+                    Endianness::swap32(element_pointer(i));
+            }
+            else if(ele_bytes == 8)
+            {
+                for(index_t i=0;i<num_ele;i++)
+                    Endianness::swap64(element_pointer(i));
+            }
+        }
+
+        m_schema->dtype().set_endianness(dest_endian);
     }
 }
 
@@ -3415,7 +3528,7 @@ Node::fetch(const std::string &path)
     // fetch w/ path forces OBJECT_T
     if(dtype().id() != DataType::OBJECT_T)
     {
-        init(DataType::Objects::object());
+        init(DataType::object());
     }
     
     std::string p_curr;
@@ -3585,6 +3698,884 @@ Node::remove(const std::string &path)
 
 //-----------------------------------------------------------------------------
 //
+// -- begin definition of Node value access methods --
+//
+//-----------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------//
+// signed integer scalars 
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+int8
+Node::as_int8()  const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT8_T,"as_int8()");
+    return *((int8*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+int16
+Node::as_int16() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT16_T,"as_int16()");
+    return *((int16*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+int32
+Node::as_int32() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT32_T,"as_int32()");
+    return *((int32*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+int64
+Node::as_int64() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT64_T,"as_int64()");
+    return *((int64*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+// unsigned integer scalar
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+uint8
+Node::as_uint8() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT8_T,"as_uint8()");
+    return *((uint8*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+uint16
+Node::as_uint16() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT16_T,"as_uint16()");
+    return *((uint16*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+uint32
+Node::as_uint32() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT32_T,"as_uint32()");
+    return *((uint32*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+uint64
+Node::as_uint64() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT64_T,"as_uint64()");
+    return *((uint64*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+// floating point scalars
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+float32
+Node::as_float32() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::FLOAT32_T,"as_float32()");
+    return *((float32*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+float64
+Node::as_float64() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::FLOAT64_T,"as_float64()");
+    return *((float64*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+// signed integers via pointers
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+int8 *
+Node::as_int8_ptr()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT8_T,"as_int8_ptr()");
+    return (int8*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+int16 *
+Node::as_int16_ptr()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT16_T,"as_int16_ptr()");
+    return (int16*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+int32 *
+Node::as_int32_ptr()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT32_T,"as_int32_ptr()");
+    return (int32*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+int64 *
+Node::as_int64_ptr()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT64_T,"as_int64_ptr()");
+    return (int64*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+// unsigned integers via pointers
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+uint8 *
+Node::as_uint8_ptr()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT8_T,"as_uint8_ptr()");
+    return (uint8*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+uint16 *
+Node::as_uint16_ptr()   
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT16_T,"as_uint16_ptr()");
+    return (uint16*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+uint32 *
+Node::as_uint32_ptr()   
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT32_T,"as_uint32_ptr()");
+    return (uint32*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+uint64 *
+Node::as_uint64_ptr()   
+{     
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT64_T,"as_uint64_ptr()");
+    return (uint64*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+// floating point via pointers
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+float32 *
+Node::as_float32_ptr()  
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::FLOAT32_T,"as_float32_ptr()");
+    return (float32*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+float64 *
+Node::as_float64_ptr()  
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::FLOAT64_T,"as_float64_ptr()");
+    return (float64*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+// signed integer array types via conduit::DataArray
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+int8_array
+Node::as_int8_array()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT8_T,"as_int8_array()");
+    return int8_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+int16_array
+Node::as_int16_array()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT16_T,"as_int16_array()");
+    return int16_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+int32_array
+Node::as_int32_array()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT32_T,"as_int32_array()");
+    return int32_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+int64_array
+Node::as_int64_array()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT64_T,"as_int64_array()");
+    return int64_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// unsigned integer array types via conduit::DataArray
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+uint8_array
+Node::as_uint8_array()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT8_T,"as_uint8_array()");
+    return uint8_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+uint16_array
+Node::as_uint16_array()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT16_T,"as_uint16_array()");
+    return uint16_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+uint32_array
+Node::as_uint32_array()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT32_T,"as_uint32_array()");
+    return uint32_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+uint64_array
+Node::as_uint64_array() 
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT64_T,"as_uint64_array()");
+    return uint64_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// floating point array types via conduit::DataArray
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+float32_array
+Node::as_float32_array()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         DataType::FLOAT32_T,
+                         "as_float32_array()");
+    return float32_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+float64_array
+Node::as_float64_array()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         DataType::FLOAT64_T,
+                         "as_float64_array()");
+    return float64_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// signed integer array types via conduit::DataArray (const variants)
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+int8_array
+Node::as_int8_array() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT8_T,"as_int8_array()");
+    return int8_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+int16_array
+Node::as_int16_array() const 
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT16_T,"as_int16_array()");
+    return int16_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+int32_array
+Node::as_int32_array() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT32_T,"as_int32_array()");
+    return int32_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+int64_array
+Node::as_int64_array() const 
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::INT64_T,"as_int64_array()");
+    return int64_array(m_data,dtype());
+}
+
+
+//---------------------------------------------------------------------------//
+// unsigned integer array types via conduit::DataArray (const variants)
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+uint8_array
+Node::as_uint8_array() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT8_T,"as_uint8_array()");
+    return uint8_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+uint16_array
+Node::as_uint16_array() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT16_T,"as_uint16_array()");
+    return uint16_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+uint32_array
+Node::as_uint32_array() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT32_T,"as_uint32_array()");
+    return uint32_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+uint64_array
+Node::as_uint64_array() const 
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::UINT64_T,"as_uint64_array()");
+    return uint64_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// floating point array value via conduit::DataArray (const variants)
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+float32_array
+Node::as_float32_array() const 
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         DataType::FLOAT32_T,
+                         "as_float32_array()");
+    return float32_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+float64_array
+Node::as_float64_array() const 
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         DataType::FLOAT64_T,
+                         "as_float64_array()");
+    return float64_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// char8_str cases
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+char *
+Node::as_char8_str()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::CHAR8_STR_T,"as_char8_str()");
+    return (char *)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+const char *
+Node::as_char8_str() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::CHAR8_STR_T,"as_char8_str()");
+    return (const char *)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+std::string
+Node::as_string() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(), DataType::CHAR8_STR_T,"as_string()");
+    return std::string(as_char8_str());
+}
+
+//---------------------------------------------------------------------------//
+// direct data pointer access 
+uint8 *
+Node::data_pointer() 
+{
+    return (uint8*)m_data;
+}
+
+
+//-----------------------------------------------------------------------------
+///  Direct access to data at leaf types (native c++ types)
+//-----------------------------------------------------------------------------
+     
+//---------------------------------------------------------------------------//
+// signed integer scalars
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+char
+Node::as_char() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_CHAR_DATATYPE_ID,
+                         "as_char()");
+    return *((char*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+short
+Node::as_short() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_SHORT_DATATYPE_ID,
+                         "as_short()");
+    return *((short*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+int
+Node::as_int() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_INT_DATATYPE_ID,
+                         "as_int()");
+    return *((int*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+long
+Node::as_long()  const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_LONG_DATATYPE_ID,
+                         "as_long()");
+    return *((long*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+// unsigned integer scalars
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+unsigned char
+Node::as_unsigned_char() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_CHAR_DATATYPE_ID,
+                         "as_unsigned_char()");
+    return *((unsigned char*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+unsigned short 
+Node::as_unsigned_short() const 
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_SHORT_DATATYPE_ID,
+                         "as_unsigned_short()");
+    return *((unsigned short*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+unsigned int
+Node::as_unsigned_int()const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_INT_DATATYPE_ID,
+                         "as_unsigned_int()");
+    return *((unsigned int*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+unsigned long
+Node::as_unsigned_long() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_LONG_DATATYPE_ID,
+                         "as_unsigned_long()");
+    return *(( unsigned long*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+// floating point scalars
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+float
+Node::as_float() const 
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_FLOAT_DATATYPE_ID,
+                         "as_float()");
+    return *((float*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+double
+Node::as_double() const 
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_DOUBLE_DATATYPE_ID,
+                         "as_double()");
+    return *((double*)element_pointer(0));
+}
+
+//---------------------------------------------------------------------------//
+// signed integers via pointers
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+char *
+Node::as_char_ptr()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_CHAR_DATATYPE_ID,
+                         "as_char_ptr()");
+    return (char*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+short *
+Node::as_short_ptr()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_SHORT_DATATYPE_ID,
+                         "as_short_ptr()");
+    return (short*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+int *
+Node::as_int_ptr()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_INT_DATATYPE_ID,
+                         "as_int_ptr()");
+    return (int*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+long *
+Node::as_long_ptr()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_LONG_DATATYPE_ID,
+                         "as_long_ptr()");
+    return (long*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+// unsigned integers via pointers
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+unsigned char *
+Node::as_unsigned_char_ptr()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_CHAR_DATATYPE_ID,
+                         "as_unsigned_char_ptr()");
+    return (unsigned char*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+unsigned short *
+Node::as_unsigned_short_ptr()
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_SHORT_DATATYPE_ID,
+                         "as_unsigned_short_ptr()");
+    return (unsigned short*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+unsigned int *
+Node::as_unsigned_int_ptr()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_INT_DATATYPE_ID,
+                         "as_unsigned_int_ptr()");
+    return (unsigned int*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+unsigned long *
+Node::as_unsigned_long_ptr()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_LONG_DATATYPE_ID,
+                         "as_unsigned_long_ptr()");
+    return (unsigned long*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+// floating point via pointers
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+float *
+Node::as_float_ptr()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_FLOAT_DATATYPE_ID,
+                         "as_float_ptr()");
+    return (float*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+double *
+Node::as_double_ptr()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_DOUBLE_DATATYPE_ID,
+                         "as_double_ptr()");
+    return (double*)element_pointer(0);
+}
+
+//---------------------------------------------------------------------------//
+// signed integer array types via conduit::DataArray
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+char_array
+Node::as_char_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_CHAR_DATATYPE_ID,
+                         "as_char_array()");
+    return char_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+short_array
+Node::as_short_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_SHORT_DATATYPE_ID,
+                         "as_short_array()");
+    return short_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+int_array
+Node::as_int_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_INT_DATATYPE_ID,
+                         "as_int_array()");
+    return int_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+long_array
+Node::as_long_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_LONG_DATATYPE_ID,
+                         "as_long_array()");
+    return long_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// unsigned integer array types via conduit::DataArray
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+unsigned_char_array
+Node::as_unsigned_char_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_CHAR_DATATYPE_ID,
+                         "as_unsigned_char_array()");
+    return unsigned_char_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+unsigned_short_array
+Node::as_unsigned_short_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_SHORT_DATATYPE_ID,
+                         "as_unsigned_short_array()");
+    return unsigned_short_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+unsigned_int_array
+Node::as_unsigned_int_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_INT_DATATYPE_ID,
+                         "as_unsigned_int_array()");
+    return unsigned_int_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+unsigned_long_array
+Node::as_unsigned_long_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_LONG_DATATYPE_ID,
+                         "as_unsigned_long_array()");
+    return unsigned_long_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// floating point array types via conduit::DataArray
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+float_array
+Node::as_float_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_FLOAT_DATATYPE_ID,
+                         "as_float_array()");
+    return float_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+double_array
+Node::as_double_array()
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_DOUBLE_DATATYPE_ID,
+                         "as_double_array()");
+    return double_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// signed integer array types via conduit::DataArray (const variants)
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+char_array
+Node::as_char_array() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_CHAR_DATATYPE_ID,
+                         "as_char_array()");
+    return char_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+short_array
+Node::as_short_array() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_SHORT_DATATYPE_ID,
+                         "as_short_array()");
+    return short_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+int_array
+Node::as_int_array() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_INT_DATATYPE_ID,
+                         "as_int_array()");
+    return int_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+long_array
+Node::as_long_array() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_LONG_DATATYPE_ID,
+                         "as_long_array()");
+    return long_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// unsigned integer array types via conduit::DataArray (const variants)
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+unsigned_char_array
+Node::as_unsigned_char_array() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_CHAR_DATATYPE_ID,
+                         "as_unsigned_char_array()");
+    return unsigned_char_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+unsigned_short_array
+Node::as_unsigned_short_array() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_SHORT_DATATYPE_ID,
+                         "as_unsigned_short_array()");
+    return unsigned_short_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+unsigned_int_array
+Node::as_unsigned_int_array() const
+{ 
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_INT_DATATYPE_ID,
+                         "as_unsigned_int_array()");
+    return unsigned_int_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+unsigned_long_array
+Node::as_unsigned_long_array() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_UNSIGNED_LONG_DATATYPE_ID,
+                         "as_unsigned_long_array()");
+    return unsigned_long_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+// floating point array value via conduit::DataArray (const variants)
+//---------------------------------------------------------------------------//
+
+//---------------------------------------------------------------------------//
+float_array
+Node::as_float_array() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_FLOAT_DATATYPE_ID,
+                         "as_float_array()");
+    return float_array(m_data,dtype());
+}
+
+//---------------------------------------------------------------------------//
+double_array
+Node::as_double_array() const
+{
+    CONDUIT_ASSERT_DTYPE(dtype().id(),
+                         CONDUIT_NATIVE_DOUBLE_DATATYPE_ID,
+                         "as_double_array()");
+    return double_array(m_data,dtype());
+}
+
+//-----------------------------------------------------------------------------
+//
+// -- end definition of Node value access methods --
+//
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//
 // -- begin definition of Interface Warts --
 //
 //-----------------------------------------------------------------------------
@@ -3595,8 +4586,12 @@ Node::remove(const std::string &path)
 void
 Node::set_schema_pointer(Schema *schema_ptr)
 {
-    if(m_schema->is_root())
+    // if(m_schema->is_root())
+    if(m_owns_schema)
+    {
         delete m_schema;
+        m_owns_schema = false;
+    }
     m_schema = schema_ptr;    
 }
     
@@ -3700,18 +4695,18 @@ Node::mmap(const std::string &stream_path, index_t dsize)
     ///
     /// For now, we simply throw an error
     ///
-    THROW_ERROR("<Node::mmap> conduit does not yet support mmap on Windows");
+    CONDUIT_ERROR("<Node::mmap> conduit does not yet support mmap on Windows");
 #else    
     m_mmap_fd   = open(stream_path.c_str(),O_RDWR| O_CREAT);
     m_data_size = dsize;
 
     if (m_mmap_fd == -1) 
-        THROW_ERROR("<Node::mmap> failed to open: " << stream_path);
+        CONDUIT_ERROR("<Node::mmap> failed to open: " << stream_path);
 
     m_data = ::mmap(0, dsize, PROT_READ | PROT_WRITE, MAP_SHARED, m_mmap_fd, 0);
 
     if (m_data == MAP_FAILED) 
-        THROW_ERROR("<Node::mmap> MAP_FAILED" << stream_path);
+        CONDUIT_ERROR("<Node::mmap> MAP_FAILED" << stream_path);
     
     m_alloced = false;
     m_mmaped  = true;
@@ -3723,14 +4718,20 @@ Node::mmap(const std::string &stream_path, index_t dsize)
 void
 Node::release()
 {
-    for (index_t i = 0; i < m_children.size(); i++) {
+    // delete all children
+    for (index_t i = 0; i < m_children.size(); i++)
+    {
         Node* node = m_children[i];
         delete node;
     }
     m_children.clear();
 
+    // clean up any allocated or mmaped buffers
     if(m_alloced && m_data)
     {
+        ///
+        /// TODO: why do we need to check for empty here?
+        ///
         if(dtype().id() != DataType::EMPTY_T)
         {   
             // clean up our storage
@@ -3764,13 +4765,12 @@ void
 Node::cleanup()
 {
     release();
-    if(m_schema->is_root())
+    // if(m_schema->is_root())
+    if(m_owns_schema && m_schema != NULL)
     {
-        if(m_schema != NULL)
-        {
-            delete m_schema;
-            m_schema = NULL;
-        }
+        delete m_schema;
+        m_schema = NULL;
+        m_owns_schema = false;
     }
     else if(m_schema != NULL)
     {
@@ -3783,14 +4783,14 @@ Node::cleanup()
 void
 Node::init_list()
 {
-    init(DataType::Objects::list());
+    init(DataType::list());
 }
  
 //---------------------------------------------------------------------------//
 void
 Node::init_object()
 {
-    init(DataType::Objects::object());
+    init(DataType::object());
 }
 
 
@@ -3808,6 +4808,7 @@ Node::init_defaults()
     m_mmap_fd   = -1;
 
     m_schema = new Schema(DataType::EMPTY_T);
+    m_owns_schema = true;
     
     m_parent = NULL;
 }
@@ -3827,7 +4828,6 @@ Node::walk_schema(Node   *node,
                   void   *data)
 {
     // we can have an object, list, or leaf
-    node->set_schema_pointer(schema);
     node->set_data_pointer(data);
     if(schema->dtype().id() == DataType::OBJECT_T)
     {
@@ -3867,7 +4867,6 @@ Node::mirror_node(Node   *node,
                   Node   *src)
 {
     // we can have an object, list, or leaf
-    node->set_schema_pointer(schema);
     node->set_data_pointer(src->m_data);
     
     if(schema->dtype().id() == DataType::OBJECT_T)

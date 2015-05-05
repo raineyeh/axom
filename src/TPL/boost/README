@@ -1,0 +1,6 @@
+# I couldn't figure out how to have cmake run the below tar command. (Probably have to add a custom command, rather than using ExternalProject)
+# Instead, I untar'ed this and re-tarred a smaller boost.  CMake will then untar that smaller boost header set.
+# I didn't check the full boost tarball into the repo.
+-- Aaron
+
+tar xvzf boost_1_58_0.tar.gz --files-from=boost_filelist

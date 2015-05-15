@@ -28,36 +28,45 @@ set(conduit_headers
     ${PROJECT_SOURCE_DIR}/src/conduit/Conduit_Exports.h
     )
 
-foreach(hdr ${conduit_headers})
- message(STATUS "copy ${hdr} to ${HEADER_INCLUDES_DIRECTORY}/conduit")
- file(COPY ${hdr} DESTINATION ${HEADER_INCLUDES_DIRECTORY}/conduit)
-endforeach()
-
 #
 # Specify all sources
 #
 set(conduit_sources
-    ${PROJECT_SOURCE_DIR}/src/conduit/Core.cpp
-    ${PROJECT_SOURCE_DIR}/src/conduit/Error.cpp
-    ${PROJECT_SOURCE_DIR}/src/conduit/Endianness.cpp
-    ${PROJECT_SOURCE_DIR}/src/conduit/DataType.cpp
-    ${PROJECT_SOURCE_DIR}/src/conduit/DataArray.cpp
-    ${PROJECT_SOURCE_DIR}/src/conduit/Generator.cpp
-    ${PROJECT_SOURCE_DIR}/src/conduit/Node.cpp
-    ${PROJECT_SOURCE_DIR}/src/conduit/NodeIterator.cpp
-    ${PROJECT_SOURCE_DIR}/src/conduit/Schema.cpp
-    ${PROJECT_SOURCE_DIR}/src/conduit/Utils.cpp
+    src/conduit/Core.cpp
+    src/conduit/Error.cpp
+    src/conduit/Endianness.cpp
+    src/conduit/DataType.cpp
+    src/conduit/DataArray.cpp
+    src/conduit/Generator.cpp
+    src/conduit/Node.cpp
+    src/conduit/NodeIterator.cpp
+    src/conduit/Schema.cpp
+    src/conduit/Utils.cpp
     )
 
-make_library(conduit "${conduit_sources}")
-target_include_directories(conduit PRIVATE ${HEADER_INCLUDES_DIRECTORY}/conduit)
+make_library(conduit "${conduit_sources}" "${conduit_headers}")
+add_dependencies(conduit copy_headers_conduit)
 target_include_directories(conduit PRIVATE
     ${PROJECT_SOURCE_DIR}/src/thirdparty_builtin/rapidjson/include)
+    
+target_include_directories(conduit PRIVATE
+                           ${HEADER_INCLUDES_DIRECTORY}/conduit/)
+
+
 
 install(TARGETS conduit DESTINATION lib EXPORT ${PROJECT_NAME}-targets)
+
+
+#
+# custom target to copy header files in the "include" folder of the build tree.
+#
+copy_headers_target( ${PROJECT_NAME} "${conduit_headers}"
+                     ${HEADER_INCLUDES_DIRECTORY}/conduit/ )
 
 ################################
 # Create CMake importable
 # exports for all of our targets
 ################################
 install(EXPORT ${PROJECT_NAME}-targets DESTINATION lib/cmake)
+
+

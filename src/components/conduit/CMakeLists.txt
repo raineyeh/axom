@@ -6,26 +6,27 @@ project(conduit)
 include(${PROJECT_SOURCE_DIR}/src/CMake/BasicChecks.cmake)
 
 file(MAKE_DIRECTORY ${HEADER_INCLUDES_DIRECTORY}/conduit)
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/src/conduit/Conduit_Config.h.in"
-                "${HEADER_INCLUDES_DIRECTORY}/conduit/Conduit_Config.h" )
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/src/conduit/Conduit_Config.hpp.in"
+                "${HEADER_INCLUDES_DIRECTORY}/conduit/Conduit_Config.hpp" )
 
 #
 # Specify all headers
 #
 set(conduit_headers
-    ${PROJECT_SOURCE_DIR}/src/conduit/Bitwidth_Style_Types.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/DataArray.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/Endianness.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/Node.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/conduit.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/Core.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/DataType.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/Generator.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/Error.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/NodeIterator.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/Schema.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/Utils.h
-    ${PROJECT_SOURCE_DIR}/src/conduit/Conduit_Exports.h
+    ${PROJECT_SOURCE_DIR}/src/conduit/Bitwidth_Style_Types.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/DataArray.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/Endianness.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/Node.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/conduit.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/Core.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/DataType.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/Generator.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/Error.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/NodeIterator.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/Schema.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/Utils.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/Conduit_Exports.hpp
+    ${PROJECT_SOURCE_DIR}/src/conduit/Conduit_License.hpp
     )
 
 #

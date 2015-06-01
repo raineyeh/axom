@@ -1,5 +1,5 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// Copyright (c) 2014, Lawrence Livermore National Security, LLC.
+// Copyright (c) 2014-2015, Lawrence Livermore National Security, LLC.
 // 
 // Produced at the Lawrence Livermore National Laboratory
 // 
@@ -42,21 +42,32 @@
 // 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 
+
+//-----------------------------------------------------------------------------
+// -- Python includes (these must be included first) -- 
+//-----------------------------------------------------------------------------
 #include <Python.h>
 #include <structmember.h>
+
+//-----------------------------------------------------------------------------
+// -- standard lib includes -- 
+//-----------------------------------------------------------------------------
 #include <iostream>
 #include <vector>
 
 //---------------------------------------------------------------------------//
 // include numpy
-// 
+//---------------------------------------------------------------------------//
 // TODO: Use 1.7 deprecated API, or not ?
 //---------------------------------------------------------------------------//
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <numpy/arrayobject.h>
 
-#include "conduit.h"
-#include "Conduit_Python_Exports.h"
+//---------------------------------------------------------------------------//
+// conduit includes
+//---------------------------------------------------------------------------//
+#include "conduit.hpp"
+#include "Conduit_Python_Exports.hpp"
 
 using namespace conduit;
 

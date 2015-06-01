@@ -1,5 +1,5 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// Copyright (c) 2014, Lawrence Livermore National Security, LLC.
+// Copyright (c) 2014-2015, Lawrence Livermore National Security, LLC.
 // 
 // Produced at the Lawrence Livermore National Laboratory
 // 
@@ -48,7 +48,7 @@
 ///
 //-----------------------------------------------------------------------------
 
-#include "conduit.h"
+#include "conduit.hpp"
 
 #include <iostream>
 #include "gtest/gtest.h"

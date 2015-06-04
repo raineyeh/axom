@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright (c) 2014, Lawrence Livermore National Security, LLC.
+# Copyright (c) 2014-2015, Lawrence Livermore National Security, LLC.
 # 
 # Produced at the Lawrence Livermore National Laboratory
 # 
@@ -81,6 +81,16 @@ include(CMake/BasicChecks.cmake)
 ################################
 include(CMake/Setup3rdParty.cmake)
 
+################################
+# Setup docs targets
+################################
+include(CMake/SetupDocs.cmake)
+
+################################
+# Setup tests helpers
+################################
+include(CMake/SetupTests.cmake)
+
 
 ################################
 # Add the conduit lib
@@ -97,6 +107,16 @@ add_subdirectory(conduit)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/conduit_io
                     ${CMAKE_CURRENT_BINARY_DIR}/conduit_io)
 add_subdirectory(conduit_io)
+
+
+################################
+# Add the conduit-viz lib 
+################################
+# add conduit_viz include dirs so units tests have access to the headers
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/conduit_viz
+                    ${CMAKE_CURRENT_BINARY_DIR}/conduit_viz)
+add_subdirectory(conduit_viz)
+
 
 ################################
 # Add the conduit-mpi lib 

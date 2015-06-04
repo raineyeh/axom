@@ -1,5 +1,5 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// Copyright (c) 2014, Lawrence Livermore National Security, LLC.
+// Copyright (c) 2014-2015, Lawrence Livermore National Security, LLC.
 // 
 // Produced at the Lawrence Livermore National Laboratory
 // 
@@ -47,9 +47,12 @@
 /// file: Error.cpp
 ///
 //-----------------------------------------------------------------------------
+#include "Error.hpp"
 
-#include "Error.h"
-#include "Node.h"
+//-----------------------------------------------------------------------------
+// -- conduit includes -- 
+//-----------------------------------------------------------------------------
+#include "Node.hpp"
 
 //-----------------------------------------------------------------------------
 // -- begin conduit:: --

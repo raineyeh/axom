@@ -45,8 +45,8 @@ set(conduit_sources
     src/conduit/Utils.cpp
     )
 
-make_library(conduit "${conduit_sources}" "${conduit_headers}")
-add_dependencies(conduit copy_headers_conduit)
+make_library(LIBRARY_NAME conduit LIBRARY_SOURCES "${conduit_sources}")
+target_include_directories(conduit PRIVATE ${HEADER_INCLUDES_DIRECTORY}/conduit)
 target_include_directories(conduit PRIVATE
     ${PROJECT_SOURCE_DIR}/src/thirdparty_builtin/rapidjson/include)
     

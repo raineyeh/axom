@@ -1,5 +1,5 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// Copyright (c) 2014, Lawrence Livermore National Security, LLC.
+// Copyright (c) 2014-2015, Lawrence Livermore National Security, LLC.
 // 
 // Produced at the Lawrence Livermore National Laboratory
 // 
@@ -47,13 +47,12 @@
 /// file: Generator.cpp
 ///
 //-----------------------------------------------------------------------------
+#include "Generator.hpp"
 
 //-----------------------------------------------------------------------------
-// -- conduit library includes -- 
+// -- standard lib includes -- 
 //-----------------------------------------------------------------------------
-#include "Generator.h"
-#include "Error.h"
-#include "Utils.h"
+#include <stdio.h>
 
 //-----------------------------------------------------------------------------
 // -- rapidjson includes -- 
@@ -61,9 +60,10 @@
 #include "rapidjson/document.h"
 
 //-----------------------------------------------------------------------------
-// -- standard lib includes -- 
+// -- conduit library includes -- 
 //-----------------------------------------------------------------------------
-#include <stdio.h>
+#include "Error.hpp"
+#include "Utils.hpp"
 
 //-----------------------------------------------------------------------------
 // -- begin conduit:: --

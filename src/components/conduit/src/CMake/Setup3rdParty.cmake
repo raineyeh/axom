@@ -1,5 +1,5 @@
 ###############################################################################
-# Copyright (c) 2014, Lawrence Livermore National Security, LLC.
+# Copyright (c) 2014-2015, Lawrence Livermore National Security, LLC.
 # 
 # Produced at the Lawrence Livermore National Laboratory
 # 
@@ -67,6 +67,12 @@ include_directories(${RAPIDJSON_INCLUDE_DIR})
 ################################
 add_subdirectory(thirdparty_builtin/libb64-1.2.1/)
 include_directories(thirdparty_builtin/libb64-1.2.1/include/)
+
+################################
+# Setup and build civetweb
+################################
+add_subdirectory(thirdparty_builtin/civetweb/)
+include_directories(thirdparty_builtin/civetweb/include)
 
 ################################
 # Optional Features

@@ -1,5 +1,5 @@
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
-// Copyright (c) 2014, Lawrence Livermore National Security, LLC.
+// Copyright (c) 2014-2015, Lawrence Livermore National Security, LLC.
 // 
 // Produced at the Lawrence Livermore National Laboratory
 // 
@@ -47,8 +47,7 @@
 /// file: Utils.cpp
 ///
 //-----------------------------------------------------------------------------
-
-#include "Utils.h"
+#include "Utils.hpp"
 
 //-----------------------------------------------------------------------------
 // -- begin conduit:: --

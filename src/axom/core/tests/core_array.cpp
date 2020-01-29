@@ -10,6 +10,7 @@
 
 // C/C++ includes
 #include <algorithm>                          /* for std::fill_n */
+#include <vector>
 
 namespace axom
 {
@@ -42,7 +43,6 @@ IndexType calc_new_capacity( Array< T > & v, IndexType increase )
  * \brief Check if two Arrays are equivalent. Does not check the resize ratio.
  * \param [in] lhs, the first Array to compare.
  * \param [in] rhs, the second Array to compare.
- * \return the new capacity.
  */
 template< typename T >
 void check_copy( const Array< T >& lhs, const Array< T >& rhs )
@@ -51,9 +51,11 @@ void check_copy( const Array< T >& lhs, const Array< T >& rhs )
   EXPECT_EQ( lhs.numComponents(), rhs.numComponents() );
   EXPECT_EQ( lhs.capacity(), rhs.capacity() );
 
-  const T* lhs_data = lhs.getData();
-  const T* rhs_data = rhs.getData();
-  EXPECT_EQ( lhs_data, rhs_data );
+  /* Check the array data using the [] operators. */
+  for ( IndexType i = 0 ; i < lhs.size() * lhs.numComponents() ; ++i )
+  {
+      EXPECT_EQ( lhs[ i ], rhs[ i ] );
+  }
 }
 
 /*!
@@ -1042,6 +1044,75 @@ TEST( core_array_DeathTest, checkExternal )
     for ( IndexType i = 0 ; i < MAX_VALUES ; ++i )
     {
       EXPECT_EQ( buffer.doubles[ i ], MAGIC_NUM );
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
+TEST( core_array, check_copy)
+{
+  constexpr int MAGIC_INT = 255;
+  constexpr double MAGIC_DOUBLE = 5683578.8;
+
+  for ( IndexType capacity = 2 ; capacity < 512 ; capacity *= 2 )
+  {
+    IndexType size = capacity;
+    for ( IndexType n_components = 1 ; n_components <= 4 ; n_components++ )
+    {
+      /* Check copy and move semantics for Array of ints */
+      Array< int > v_int( size, n_components, capacity );
+      v_int.fill(MAGIC_INT);
+
+      std::vector <int> ints (size * n_components, MAGIC_INT);
+      Array< int > v_int_external (ints.data(), size, n_components, capacity);
+
+      Array< int > v_int_copy_ctor (v_int);
+      Array< int > v_int_copy_assign(0,1,0);
+      v_int_copy_assign = v_int;
+      internal::check_copy( v_int, v_int_copy_ctor );
+      internal::check_copy( v_int, v_int_copy_assign );
+
+      Array< int > v_int_external_copy_ctor (v_int_external);
+      Array< int > v_int_external_copy_assign(0,1,0);
+      v_int_external_copy_assign = v_int_external;
+      internal::check_copy( v_int_external, v_int_external_copy_ctor );
+      internal::check_copy( v_int_external, v_int_external_copy_assign );
+
+      Array< int > v_int_move_assign(0,1,0);
+      v_int_move_assign = std::move (v_int_copy_assign);
+      Array< int > v_int_move_ctor = std::move (v_int_copy_ctor);
+      internal::check_copy( v_int, v_int_move_assign );
+      internal::check_copy( v_int, v_int_move_ctor );
+      EXPECT_EQ (v_int_copy_assign.getData(), nullptr);
+      EXPECT_EQ (v_int_copy_ctor.getData(), nullptr);
+
+      /* Check copy and move semantics for Array of doubles */
+      Array< double > v_double( size, n_components, capacity );
+      v_double.fill(MAGIC_DOUBLE);
+
+      std::vector <double> doubles (size * n_components, MAGIC_DOUBLE);
+      Array< double > v_double_external (doubles.data(), size, n_components,
+                                         capacity);
+
+      Array< double > v_double_copy_ctor (v_double);
+      Array< double > v_double_copy_assign(0,1,0);
+      v_double_copy_assign = v_double;
+      internal::check_copy( v_double, v_double_copy_ctor );
+      internal::check_copy( v_double, v_double_copy_assign );
+
+      Array< double > v_double_external_copy_ctor (v_double_external);
+      Array< double > v_double_external_copy_assign(0,1,0);
+      v_double_external_copy_assign = v_double_external;
+      internal::check_copy( v_double_external, v_double_external_copy_ctor );
+      internal::check_copy( v_double_external, v_double_external_copy_assign );
+      
+      Array< double > v_double_move_assign(0,1,0);
+      v_double_move_assign = std::move (v_double_copy_assign);      
+      Array< double > v_double_move_ctor = std::move (v_double_copy_ctor);
+      internal::check_copy( v_double, v_double_move_assign );
+      internal::check_copy( v_double, v_double_move_ctor );
+      EXPECT_EQ (v_double_copy_assign.getData(), nullptr);
+      EXPECT_EQ (v_double_copy_ctor.getData(), nullptr);
     }
   }
 }

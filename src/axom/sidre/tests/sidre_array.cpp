@@ -15,6 +15,7 @@
 
 // C/C++ includes
 #include <algorithm>                    /* for std::fill_n */
+#include <iostream>
 
 namespace axom
 {
@@ -58,9 +59,22 @@ void check_copy( const Array< T >& lhs, const Array< T >& rhs )
   EXPECT_EQ( lhs.numComponents(), rhs.numComponents() );
   EXPECT_EQ( lhs.capacity(), rhs.capacity() );
 
-  const T* lhs_data = lhs.getData();
-  const T* rhs_data = rhs.getData();
-  EXPECT_EQ( lhs_data, rhs_data );
+  View const * lhs_ptr = lhs.getView();
+  View const * rhs_ptr = rhs.getView();
+
+  EXPECT_EQ( lhs_ptr->getTypeID(), rhs_ptr->getTypeID() );
+  EXPECT_EQ( lhs_ptr->isApplied(), rhs_ptr->isApplied() );
+  EXPECT_EQ( lhs_ptr->hasBuffer(), rhs_ptr->hasBuffer() );
+  EXPECT_EQ( lhs_ptr->getTotalBytes(), rhs_ptr->getTotalBytes() );
+
+  /* Check the array data using the [] operators. */
+  for ( IndexType i = 0 ; i < lhs.size() * lhs.numComponents() ; ++i )
+  {
+      EXPECT_EQ( lhs[ i ], rhs[ i ] );
+  }
+
+  lhs_ptr = nullptr;
+  rhs_ptr = nullptr;
 }
 
 /*!
@@ -308,6 +322,8 @@ void check_set( Array< T >& v )
       EXPECT_EQ( v( i, j ), i * num_components + j );
     }
   }
+
+  delete[] buffer;
 }
 
 /*!
@@ -1178,6 +1194,72 @@ TEST( sidre_core_array, checkSidrePermanence)
   }
 }
 
+//------------------------------------------------------------------------------
+TEST( sidre_core_array, check_copy)
+{
+  constexpr int MAGIC_INT = 255;
+  constexpr double MAGIC_DOUBLE = 5683578.8;
+
+  sidre::DataStore ds;
+  sidre::Group* root = ds.getRoot();
+
+  for ( axom::IndexType capacity = 2 ; capacity < 512 ; capacity *= 2 )
+  {
+    axom::IndexType size = capacity / 2;
+    for ( axom::IndexType n_components = 1 ; n_components <= 4 ;
+          n_components++ )
+    {
+      /* Check copy and move semantics for Array of ints */
+      Array< int > v_int_sidre( root->createView( "int" ), size, n_components,
+                                capacity );
+      v_int_sidre.fill(MAGIC_INT);
+
+      Array< int > v_int_sidre_copy_ctor( v_int_sidre, "copy_ctor_int" );
+      Array< int > v_int_sidre_copy_assign( root->createView(
+                                              "copy_assign_int"), 0, 1, 0);
+      v_int_sidre_copy_assign = v_int_sidre;
+      internal::check_copy( v_int_sidre, v_int_sidre_copy_ctor );
+      internal::check_copy( v_int_sidre, v_int_sidre_copy_assign );
+
+      Array< int > v_int_sidre_move_assign(root->createView("move_assign_int"),
+                                           0, 1, 0);
+      v_int_sidre_move_assign = std::move (v_int_sidre_copy_assign);
+      Array< int > v_int_sidre_move_ctor( std::move (v_int_sidre_copy_ctor),
+                                          "move_ctor_int");
+      internal::check_copy( v_int_sidre, v_int_sidre_move_assign );
+      internal::check_copy( v_int_sidre, v_int_sidre_move_ctor );
+      EXPECT_EQ (v_int_sidre_copy_assign.getData(), nullptr);
+      EXPECT_EQ (v_int_sidre_copy_ctor.getData(), nullptr);
+
+      Array< double > v_double_sidre( root->createView( "double" ), size,
+                                      n_components, capacity );
+      v_double_sidre.fill(MAGIC_DOUBLE);
+
+      /* Check copy and move semantics for Array of doubles */
+      Array< double > v_double_sidre_copy_ctor (v_double_sidre, 
+                                                "copy_ctor_double");
+      Array< double > v_double_sidre_copy_assign(root->createView(
+                                                   "copy_assign_double"),
+                                                 size, n_components, capacity);
+      v_double_sidre_copy_assign = v_double_sidre;
+      internal::check_copy( v_double_sidre, v_double_sidre_copy_ctor );
+      internal::check_copy( v_double_sidre, v_double_sidre_copy_assign );
+
+      Array< double > v_double_sidre_move_assign(root->createView(
+                                                   "move_assign_double"),
+                                                 size, n_components, capacity);
+      v_double_sidre_move_assign = std::move (v_double_sidre_copy_assign);      
+      Array< double > v_double_sidre_move_ctor 
+        (std::move (v_double_sidre_copy_ctor), "move_ctor_double");
+      internal::check_copy( v_double_sidre, v_double_sidre_move_assign );
+      internal::check_copy( v_double_sidre, v_double_sidre_move_ctor );
+      EXPECT_EQ (v_double_sidre_copy_assign.getData(), nullptr);
+      EXPECT_EQ (v_double_sidre_copy_ctor.getData(), nullptr);
+
+      root->destroyViewsAndData();
+    }
+  }
+}
 
 } /* end namespace sidre */
 } /* end namespace axom */

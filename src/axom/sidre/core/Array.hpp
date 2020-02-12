@@ -13,6 +13,7 @@
 
 #include "axom/slic/interface/slic.hpp"            // for slic logging macros
 
+#include "Group.hpp"         // for Group definition
 #include "View.hpp"          // for View definition
 #include "Buffer.hpp"        // for Buffer definition
 
@@ -129,6 +130,91 @@ public:
          axom::IndexType num_components=1,
          axom::IndexType capacity=0 );
 
+  /*!
+   * \brief Copy constructor for an Array instance. 
+   * 
+   * \param [in] name the name of the View that will hold the new Array
+   *  instance. If not specified, the name will be initialized to "copy"
+   *
+   * \note A new View will be constructed to hold the copy-constructed Array.
+   *  The new View will have the same parent Group as the argument Array's View
+   *  and has the argument string as the name. The copy-constructed Array will
+   *  have a deep copy of the argument Array's data.
+   *
+   * \warning The name of a View must be unique within its owning Group.
+   */
+  Array( const Array& other, const std::string & name = "copy" );
+
+  /*!
+   * \brief Move constructor for an Array instance.
+   * 
+   * \param [in] name the name of the View that will hold the new Array
+   *  instance. If not specified, the name will be initialized to "moved_to"
+   *
+   * \note A new View will be constructed to hold the move-constructed Array.
+   *  The new View will have the same parent Group as the argument Array's View
+   *  and has the argument string as the name. The move-constructed Array will
+   *  have a deep copy of the argument Array's data and the argument Array will
+   *  be left in a valid empty state.
+   *
+   * \warning The name of a View must be unique within its owning Group.
+   */
+  Array( Array&& other, const std::string & name = "moved_to" );
+
+/// @}
+
+/// \name Array copy and move operators
+/// @{
+
+  /*!
+   * \brief Copy assignment operator for Array
+   *
+   * \note The copy-assigned Array will have a deep copy of the argument
+   *  Array's data.
+   */
+  Array& operator=( const Array& other )
+  {
+    if ( this != &other )
+    {
+      this->initialize(other.size(), other.numComponents(), other.capacity());
+      if (other.getData() != nullptr )
+      {
+        std::memcpy(this->m_data, other.getData(), 
+                    this->m_num_tuples * this->m_num_components * sizeof(T));
+      }
+    }
+
+    return *this;
+  }
+
+  /*!
+   * \brief Move assignment operator for Array
+   *
+   * \note The move-assigned Array will have a deep copy of argument Array's
+   *  data and the argument Array will be left in a valid empty state.
+   */
+  Array& operator=( Array&& other )
+  {
+    if ( this != &other )
+    {
+
+      this->initialize(other.size(), other.numComponents(), other.capacity());
+      if (other.getData() != nullptr )
+      {
+        std::memcpy(this->m_data, other.getData(), 
+                    this->m_num_tuples * this->m_num_components * sizeof(T));
+      }
+
+      other.m_data = nullptr;
+      other.m_num_tuples = 0;
+      other.m_num_components = 1;
+      other.m_capacity = 0;
+      other.describeView();
+    }
+
+    return *this;
+  }
+
 /// @}
 
   /*!
@@ -232,8 +318,6 @@ protected:
 
   View* m_view;
 
-  DISABLE_COPY_AND_ASSIGNMENT( Array );
-  DISABLE_MOVE_AND_ASSIGNMENT( Array );
 };
 
 
@@ -312,6 +396,54 @@ Array< T >::Array( View* view, axom::IndexType num_tuples,
   SLIC_ASSERT( this->m_data != nullptr );
   SLIC_ASSERT( this->m_num_tuples >= 0 );
   SLIC_ASSERT( this->m_num_components >= 1 );
+}
+
+//------------------------------------------------------------------------------
+template< typename T >
+Array< T >::Array( const Array& other, const std::string & name ) :
+  axom::Array<T>(),
+  m_view( nullptr )
+{
+  const Group * owning_group = other.m_view->getOwningGroup();
+  SLIC_ERROR_IF (owning_group->hasChildView(name),
+                 "View name must be unique. Group " << 
+                 owning_group->getPathName() << 
+                 "already has a View with name " <<
+                 "\"" << name << "\"." );
+
+  this->m_view = other.m_view->getOwningGroup()
+                 ->createView(name);
+  this->initialize( other.m_num_tuples, other.m_num_components,
+                    other.m_capacity ); 
+  std::memcpy (this->m_data, other.getData(), 
+               this->m_num_tuples * this->m_num_components * sizeof(T));
+}
+
+//------------------------------------------------------------------------------
+template< typename T >
+Array< T >::Array( Array&& other, const std::string & name  ) :
+  axom::Array<T>(),
+  m_view( nullptr )
+{
+  const Group * owning_group = other.m_view->getOwningGroup();
+  SLIC_ERROR_IF (owning_group->hasChildView(name),
+                 "View name must be unique. Group " << 
+                 owning_group->getPathName() << 
+                 "already has a View with name " <<
+                 "\"" << name << "\"." );
+
+  this->m_view = other.m_view->getOwningGroup()
+                 ->createView(name);
+  this->initialize( other.m_num_tuples, other.m_num_components,
+                    other.m_capacity ); 
+  std::memcpy (this->m_data, other.getData(), 
+               this->m_num_tuples * this->m_num_components * sizeof(T));
+
+  other.m_data = nullptr;
+  other.m_num_tuples = 0;
+  other.m_num_components = 1;
+  other.m_capacity = 0;
+  other.describeView();
 }
 
 //------------------------------------------------------------------------------

@@ -6,8 +6,7 @@
 #ifndef MINT_ConnectivityArrayHelpers_HPP_
 #define MINT_ConnectivityArrayHelpers_HPP_
 
-#include "axom/core/Array.hpp"
-
+#include "axom/mint/core/Array.hpp"
 #include "axom/mint/config.hpp"
 #include "axom/mint/mesh/CellTypes.hpp"
 

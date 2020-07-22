@@ -38,9 +38,6 @@ set( mint_tests
      ## util tests
      mint_su2_io.cpp
      mint_util_write_vtk.cpp
-
-     ## core tests
-     mint_array.cpp
    )
 
 ## lists all axom depencies used for testing

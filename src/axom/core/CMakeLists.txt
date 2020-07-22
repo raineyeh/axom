@@ -40,6 +40,7 @@ set(core_headers
     ## core
     Macros.hpp
     Array.hpp
+    MCArray.hpp
     IteratorBase.hpp
     StackArray.hpp
     Types.hpp

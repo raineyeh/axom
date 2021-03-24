@@ -113,6 +113,9 @@ if (MFEM_DIR)
                           INCLUDES  ${MFEM_INCLUDE_DIRS}
                           LIBRARIES ${MFEM_LIBRARIES}
                           TREAT_INCLUDES_AS_SYSTEM ON)
+elseif(TARGET mfem)
+    message(STATUS "Using MFEM from within the current project")
+    set(MFEM_FOUND TRUE CACHE BOOL "" FORCE)
 else()
     message(STATUS "MFEM support is OFF")
 endif()

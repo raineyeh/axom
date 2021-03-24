@@ -23,7 +23,6 @@ if (LUA_FOUND AND (NOT BLT_CXX_STD STREQUAL "c++11"))
           INCLUDES DESTINATION include)
   install(DIRECTORY   ${PROJECT_SOURCE_DIR}/thirdparty/sol
           DESTINATION include )
-  install(EXPORT axom-targets DESTINATION lib/cmake)
 
   set(SOL_FOUND TRUE CACHE INTERNAL "")
 else()
@@ -48,7 +47,6 @@ install(TARGETS              cli11
         INCLUDES DESTINATION include)
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/thirdparty/CLI11
         DESTINATION include )
-install(EXPORT axom-targets DESTINATION lib/cmake)
 
 set(CLI11_FOUND TRUE CACHE INTERNAL "")
 mark_as_advanced(CLI11_FOUND)
@@ -89,7 +87,6 @@ install(TARGETS              fmt
 install(DIRECTORY   ${PROJECT_SOURCE_DIR}/thirdparty/fmt
         DESTINATION include
         )
-install(EXPORT axom-targets DESTINATION lib/cmake)
 
 set(FMT_FOUND TRUE CACHE INTERNAL "")
 mark_as_advanced(FMT_FOUND)
@@ -176,8 +173,6 @@ if (AXOM_ENABLE_SPARSEHASH)
 
     install(DIRECTORY   ${PROJECT_SOURCE_DIR}/thirdparty/sparsehash
             DESTINATION include)
-
-    install(EXPORT axom-targets DESTINATION lib/cmake)
 
   else()
     message(STATUS "Could not configure sparsehash")

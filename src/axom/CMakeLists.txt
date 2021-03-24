@@ -48,9 +48,14 @@ blt_add_library(NAME       axom
                 SOURCES    Axom.cpp
                 DEPENDS_ON ${AXOM_COMPONENTS_ENABLED})
 
+# Add the source tree to the include directories for super-projects using axom
+target_include_directories(axom INTERFACE $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>)
+
 install(TARGETS              axom
         EXPORT               axom-targets
         DESTINATION          lib)
+# The built-in thirdparty targets have already been added to the axom-targets
+# export set, so they will be exported here as well
 install(EXPORT axom-targets DESTINATION lib/cmake)
 
 

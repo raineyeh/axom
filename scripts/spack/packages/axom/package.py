@@ -395,6 +395,11 @@ class Axom(CMakePackage, CudaPackage):
                 python_path = python_path.replace(key, path_replacements[key])
             cfg.write(cmake_cache_path("PYTHON_EXECUTABLE", python_path))
 
+        if "+py-jsonschema" in spec:
+            jsonschema_dir = get_spec_path(spec, "py-jsonschema", path_replacements, use_bin=True)
+            jsonschema_path = os.path.join(jsonschema_dir, 'jsonschema')
+            cfg.write(cmake_cache_path("JSONSCHEMA_EXECUTABLE", jsonschema_path))
+
         if "doxygen" in spec or "py-sphinx" in spec:
             cfg.write(cmake_cache_option("ENABLE_DOCS", True))
 
